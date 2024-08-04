@@ -1,18 +1,33 @@
+import matplotlib.pyplot as plt
+
 from parsers import parse_drill_set
 from plotting import plot_set
 
 
 def main():
-    set_str = """
-    S1 DOT 1.5<50, 12 ^ HS
-    Q1 DOT 1.5>50, 12 ^ HS
-    D(4...1) LINE 3.5 < 50, 13 v HH TO 3.5 > 50, 13 v HH
-    
-    M(1...5) LINE 2 < L40, 10 v HH TO 4 < 50, 10 v HH
-    C(1,3,2) F(2,1) LINE 2 > R40, 10 v HH TO 4>50, 10 v HH
-    """
-    first_set = parse_drill_set(8, set_str)
-    plot_set(first_set)
+    drill_file = 'drillfiles/2024_song_2.txt'
+
+    file = open(drill_file, 'rt')
+    current_text = file.read()
+    current_set = parse_drill_set(current_text)
+    ax = plot_set(current_set)
+    file.close()
+    while True:
+        file = open(drill_file, 'rt')
+        current_text = file.read()
+        # if new_text != current_text:
+        #     print('New!')
+        #     current_text = new_text
+        #     current_set = parse_drill_set(8, current_text)
+        try:
+            current_set = parse_drill_set(current_text)
+            ax.clear()
+            plot_set(current_set, ax)
+            plt.show(block=False)
+        except Exception as e:
+            print(f'File is currently invalid: {e}')
+        plt.pause(.001)
+        file.close()
 
 
 if __name__ == '__main__':

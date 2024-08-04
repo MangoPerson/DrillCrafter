@@ -18,7 +18,8 @@ class DrillPosition:
             [steps_str, yardline_str] = lr_str.split('>')
             steps = float(steps_str)
         else:
-            raise DrillFormatException('Left-right strings must be of the format: {steps} {< or >} {yardline}')
+            steps = 0
+            yardline_str = lr_str
 
         yardline = int(yardline_str.replace('R', '').replace('L', ''))
 
@@ -34,7 +35,8 @@ class DrillPosition:
             [steps_str, line_str] = fb_str.split('v')
             steps = -float(steps_str)
         else:
-            raise DrillFormatException('Front-back strings must be of the format: {steps} {^ or v} {sideline/hash}')
+            steps = 0
+            line_str = fb_str
 
         if line_str == 'HS':
             line = 0
@@ -67,15 +69,26 @@ class DrillPosition:
     def __neg__(self):
         return DrillPosition(-self.horizontal, -self.vertical)
 
+    def __truediv__(self, other):
+        return DrillPosition(self.horizontal / other, self.vertical / other)
+
+    def __abs__(self):
+        return (self.vertical ** 2 + self.horizontal ** 2) ** (1 / 2)
+
 
 class DrillShape:
     performers: list[str]
     positions: list[DrillPosition]
 
+    def t_vals(self):
+        if len(self.performers) == 1:
+            return [0]
+        else:
+            return [t / (len(self.performers) - 1) for t in range(len(self.performers))]
+
     def __init__(self, performers_str):
         def parse_numbers(num_string: str):
             num_string = num_string.strip()
-            print(f'Parsing {num_string}')
             if ',' in num_string:
                 result = []
                 for part in num_string.split(','):
@@ -105,9 +118,7 @@ class DrillShape:
 
 
 class DrillSet:
-    counts: int
     shapes: list[DrillShape]
 
-    def __init__(self, counts, shapes: list[DrillShape]):
-        self.counts = counts
+    def __init__(self, shapes: list[DrillShape]):
         self.shapes = shapes
