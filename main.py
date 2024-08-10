@@ -1,33 +1,54 @@
-import matplotlib.pyplot as plt
+import time
+import traceback
+from typing import TextIO
 
-from parsers import parse_drill_set
+import matplotlib.pyplot as plt
+import os
+
+from parsers import parse_drill_file
 from plotting import plot_set
+from drill_objects import DrillFormatException
 
 
 def main():
     drill_file = 'drillfiles/2024_song_2.txt'
 
     file = open(drill_file, 'rt')
-    current_text = file.read()
-    current_set = parse_drill_set(current_text)
-    ax = plot_set(current_set)
-    file.close()
+
+    plt.ion()
+    fig, ax = plt.subplots()
+
+    set_number = 0
+
     while True:
-        file = open(drill_file, 'rt')
-        current_text = file.read()
-        # if new_text != current_text:
-        #     print('New!')
-        #     current_text = new_text
-        #     current_set = parse_drill_set(8, current_text)
+        file.seek(0)
+        text = file.read()
         try:
-            current_set = parse_drill_set(current_text)
-            ax.clear()
-            plot_set(current_set, ax)
-            plt.show(block=False)
-        except Exception as e:
+            current_sets = parse_drill_file(text)
+
+            plot_set(current_sets[set_number], ax)
+            time.sleep(.01)
+        except DrillFormatException as e:
             print(f'File is currently invalid: {e}')
-        plt.pause(.001)
-        file.close()
+            continue
+        except Exception as e:
+            print(traceback.print_exc())
+            print(e)
+            continue
+
+        cmd, *args = input('Command: ').split(' ')
+
+        if not cmd or cmd == 'update':
+            continue
+        elif cmd == 'set':
+            new_number = int(args[0])
+            if new_number < len(current_sets):
+                set_number = new_number
+            else:
+                print('number too big')
+
+        else:
+            print('Invalid command')
 
 
 if __name__ == '__main__':

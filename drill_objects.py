@@ -94,8 +94,8 @@ class DrillShape:
                 for part in num_string.split(','):
                     result += parse_numbers(part)
                 return result
-            elif '...' in num_string:
-                bound1, bound2 = num_string.split('...')
+            elif '-' in num_string:
+                bound1, bound2 = num_string.split('-')
                 bound1, bound2 = int(bound1), int(bound2)
                 step = -1 if bound1 > bound2 else 1
                 return list(range(int(bound1), int(bound2) + step, step))
@@ -122,3 +122,10 @@ class DrillSet:
 
     def __init__(self, shapes: list[DrillShape]):
         self.shapes = shapes
+
+    def get_all_performers(self):
+        performers = []
+        for shape in self.shapes:
+            performers += shape.performers
+
+        return performers

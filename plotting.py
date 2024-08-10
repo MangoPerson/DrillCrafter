@@ -30,7 +30,20 @@ def plot_shape(shape: DrillShape, ax=None):
 
 
 def plot_set(dset: DrillSet, ax=None):
-    if not ax:
+    performers = dset.get_all_performers()
+    xdata = []
+    ydata = []
+
+    for shape in dset.shapes:
+        for pos in shape.positions:
+            xdata += [pos.horizontal]
+            ydata += [pos.vertical]
+
+    if ax:
+        fig = ax.get_figure()
+
+        ax.cla()
+    else:
         fig, ax = plt.subplots()
         fig.suptitle('SET!')
 
@@ -46,15 +59,20 @@ def plot_set(dset: DrillSet, ax=None):
     ax.set_xlabel('Steps left/right')
     ax.set_ylabel('Steps front/back')
 
-    ax.grid()
+    ax.grid(linewidth=.5, which='minor')
+    ax.grid(linewidth=1, which='major')
 
-    for shape in dset.shapes:
-        xs = [pos.horizontal for pos in shape.positions]
-        ys = [pos.vertical for pos in shape.positions]
+    ax.vlines(range(-80, 81, 8), 0, 84, color='black')
+    ax.hlines([0, 28, 56, 83.95], -80, 80, color='black')
 
-        ax.scatter(xs, ys, s=5, color='black')
-        for x, y, p in zip(xs, ys, shape.performers):
-            ax.text(x, y, p[0], va='center', ha='center', size=15)
-            ax.text(x, y, p[1:], va='top', ha='center', size=10)
+    points = ax.scatter(xdata, ydata, s=5, color='black')
 
-    return ax
+    for x, y, p in zip(xdata, ydata, performers):
+        ax.text(x, y, p[0], va='center', ha='center', size=15)
+        ax.text(x, y, p[1:], va='top', ha='center', size=10)
+
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
+    return fig, ax, points
+

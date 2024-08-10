@@ -23,3 +23,18 @@ def parse_drill_set(string: str) -> DrillSet:
     shapes = [parse_drill_shape(line) for line in textlines if line.strip()]
 
     return DrillSet(shapes)
+
+
+def parse_drill_file(string: str) -> list[DrillSet]:
+    textlines = string.split('\n')
+    splits = []
+    for line in textlines:
+        if re.match('[0-9]+:', line):
+            splits += [line]
+
+    reg = '|'.join(splits)
+
+    set_strs = re.split(reg, string)
+    sets = [parse_drill_set(set_str.strip()) for set_str in set_strs if set_str.strip()]
+
+    return sets
